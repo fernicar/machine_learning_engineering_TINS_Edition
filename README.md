@@ -58,14 +58,6 @@ to implement this workflow.
     *  Git
         *   Git can be downloaded from https://git-scm.com/. Then follow the [installation guide](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
 
-
-    * Google Cloud Account
-        *   You need a Google Cloud account
-    * A project on Google Cloud Platform
-    * Google Cloud CLI
-        *   For installation, please follow the instruction on the official
-            [Google Cloud website](https://cloud.google.com/sdk/docs/install).
-
 2.  **Installation and Setup**
 
     *   Clone repository
@@ -112,27 +104,26 @@ to implement this workflow.
 
 3.  **Configuration**
 
-    *   Set up Google Cloud credentials.
+    *   Set up your Google AI Studio API key.
 
         *   You may set the following environment variables in your shell, or in
             a `.env` file instead.
 
         ```bash
-        export GOOGLE_GENAI_USE_VERTEXAI=true
-        export GOOGLE_CLOUD_PROJECT=<your-project-id>
-        export GOOGLE_CLOUD_LOCATION=<your-project-location>
+        export GOOGLE_API_KEY=<your-google-ai-studio-api-key>
         export ROOT_AGENT_MODEL=<Google LLM to use>
-        export GOOGLE_CLOUD_STORAGE_BUCKET=<your-storage-bucket>  # Only required for deployment on Agent Engine
         ```
 
-    *   Authenticate your GCloud account.
+    #### How to get a Google AI Studio API key
 
-        ```bash
-        gcloud auth application-default login
-        gcloud auth application-default set-quota-project $GOOGLE_CLOUD_PROJECT
-        ```
+    1.  Go to the [Google AI Studio website](https://aistudio.google.com/).
+    2.  Sign in with your Google account.
+    3.  Click on "Get API key" in the top left corner.
+    4.  Create a new API key in a new or existing Google Cloud project.
+    5.  Copy the generated API key.
 
-## Running the Agent
+
+## Running the Agent Locally
 
 **Prepare your task**
 
@@ -142,33 +133,17 @@ You should prepare the inputs for your task in the following way:
 2. In that folder, create a file containing the description of the task.
 3. Place the data files in this folder.
 
-**Using `adk`**
+**Run the agent**
 
-ADK provides convenient ways to bring up agents locally and interact with them.
-You may talk to the agent using the CLI:
-
-```bash
-adk run machine_learning_engineering
-```
-
-Or via the Poetry shell:
-```bash
-poetry run adk run machine_learning_engineering
-```
-
-Or on a web interface:
+You can run the agent locally using the `run_local.py` script:
 
 ```bash
- adk web
+python run_local.py
 ```
 
-The command `adk web` will start a web server on your machine and print the URL.
+This will start an interactive chat session with the agent in your terminal.
 
 ### Example Interaction
-
-You may open the URL, select "machine_learning_engineering" in the top-left drop-down menu, and
-a chatbot interface will appear on the right. The conversation is initially
-blank. Here are some example requests you may ask the Machine Learning Agent to identity itself:
 
 > **[user]:** who are you?
 
@@ -209,62 +184,6 @@ python3 -m pytest eval
 is functional. `eval` is a demonstration of how to evaluate the agent, using the
 `AgentEvaluator` in ADK. It sends a couple requests to the agent and expects
 that the agent's responses match a pre-defined response reasonablly well.
-
-
-## Deployment
-
-You will need to have specified a GCS bucket in the environment variable `GOOGLE_CLOUD_BUCKET` as detailed in the [Configuration](#configuration) section.
-
-If the bucket does not exist, ADK will create one for you. This is the easiest option. If the bucket does exist, then you must provide permissions to the service account as described in [this](https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/troubleshooting/deploy#permission_errors) Troubleshooting article.
-
-The Machine Learning Engineering Agent can be deployed to Vertex AI Agent Engine using the following
-commands:
-
-```bash
-poetry install --with deployment
-python3 deployment/deploy.py --create
-```
-
-When the deployment finishes, it will print a line like this:
-
-```
-Created remote agent: projects/<PROJECT_NUMBER>/locations/<PROJECT_LOCATION>/reasoningEngines/<AGENT_ENGINE_ID>
-```
-
-If you forget the AGENT_ENGINE_ID, you can list the existing agents using:
-
-```bash
-python3 deployment/deploy.py --list
-```
-
-The output will be like:
-
-```
-All remote agents:
-
-123456789 ("machine_learning_engineering")
-- Create time: 2025-07-11 09:46:07+00:00
-- Update time: 2025-05-10 09:46:09+00:00
-```
-
-You may interact with the deployed agent using the `test_deployment.py` script
-```bash
-$ export USER_ID=<any string>
-$ python3 deployment/test_deployment.py --resource_id=${AGENT_ENGINE_ID} --user_id=${USER_ID}
-Found agent with resource ID: ...
-Created session for user ID: ...
-Type 'quit' to exit.
-Input: Hello. What can you do for me?
-Response: Hello! I'm a Machine Learning Engineer Assistant. I can help you achieve competition-level quality in solving machine learning tasks.
-
-To get started, please provide the task description of the competition.
-```
-
-To delete the deployed agent, you may run the following command:
-
-```bash
-python3 deployment/deploy.py --delete --resource_id=${AGENT_ENGINE_ID}
-```
 
 
 ## Appendix
